@@ -3,8 +3,10 @@ name = "muzlib-desktop"
 version = "0.1"
 description = "GUI for muzlib"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = [
+    "muzlib>=0.3.1",
+]
 
 [project.scripts]
 # The command name = "the_python_file:the_function_to_run"

@@ -400,7 +400,7 @@ def main():
     app = QApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    app.setWindowIcon(QIcon("icon.svg"))
+    # app.setWindowIcon(QIcon("icon.svg"))
 
     # TODO: add .desktop file and set this properly so that it works in KDE task manager and app switcher
     app.setDesktopFileName("muzlib")
