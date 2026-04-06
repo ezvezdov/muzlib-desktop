@@ -417,7 +417,9 @@ def main():
     #     os.environ["QT_QUICK_CONTROLS_STYLE"] = "org.kde.desktop"
 
     base_path = os.path.abspath(os.path.dirname(__file__))
-    url = QUrl(f"file://{base_path}/qml/main.qml")
+    qml_file_path = os.path.join(base_path, "qml", "main.qml")
+    url = QUrl.fromLocalFile(qml_file_path)
+
     engine.load(url)
 
     if len(engine.rootObjects()) == 0:
