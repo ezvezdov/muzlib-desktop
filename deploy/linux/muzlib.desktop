@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=0.1
+Type=Application
+Name=Muzlib
+Comment=Search, download, and manage your music library
+Exec=muzlib-desktop
+Icon=muzlib
+Terminal=false
+Categories=AudioVideo;Audio;Network;FileTransfer;
+StartupNotify=true
+StartupWMClass=muzlib
