@@ -1,0 +1,14 @@
+[project]
+name = "muzlib-desktop"
+version = "0.1"
+description = "GUI for muzlib"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+# The command name = "the_python_file:the_function_to_run"
+muzlib-desktop = "muzlib_desktop.main:main"
+
+[tool.setuptools.package-data]
+"muzlib_desktop" = ["qml/*.qml", "qml/**/*.qml"]
