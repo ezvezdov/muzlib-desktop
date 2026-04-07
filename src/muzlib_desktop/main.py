@@ -4,12 +4,9 @@ import os
 import sys
 import signal
 import base64
-import pprint
 import urllib.request
 
-# 1. Swapped QGuiApplication for QApplication (required for QFileDialog)
 from PySide6.QtWidgets import QApplication, QFileDialog
-# 2. Added QObject, Slot, and Signal for the QML bridge
 from PySide6.QtCore import QUrl, QObject, Slot, Signal, Property
 from PySide6.QtQml import QQmlApplicationEngine
 from muzlib.muzlib import Muzlib, SearchType
@@ -395,35 +392,29 @@ class Backend(QObject):
 
 def main():
     """Initializes and manages the application execution"""
-    # 3. Use QApplication instead of QGuiApplication
+
+    base_path = os.path.abspath(os.path.dirname(__file__))
 
     app = QApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    # app.setWindowIcon(QIcon("icon.svg"))
+    app.setWindowIcon(QIcon(os.path.join(base_path, "resources", "icons", "icon.svg")))
 
-    # TODO: add .desktop file and set this properly so that it works in KDE task manager and app switcher
     app.setDesktopFileName("muzlib")
 
-    # 4. Instantiate our backend and expose it to QML as 'backend'
     backend_obj = Backend()
     engine.rootContext().setContextProperty("backend", backend_obj)
 
     """Needed to close the app with Ctrl+C"""
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    # """Needed to get proper KDE style outside of Plasma"""
-    # if not os.environ.get("QT_QUICK_CONTROLS_STYLE"):
-    #     os.environ["QT_QUICK_CONTROLS_STYLE"] = "org.kde.desktop"
-
-    base_path = os.path.abspath(os.path.dirname(__file__))
     qml_file_path = os.path.join(base_path, "qml", "main.qml")
     url = QUrl.fromLocalFile(qml_file_path)
 
     engine.load(url)
 
     if len(engine.rootObjects()) == 0:
-        quit()
+        sys.exit()
 
     app.exec()
 
