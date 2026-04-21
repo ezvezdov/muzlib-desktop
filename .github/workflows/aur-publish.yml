@@ -21,15 +21,11 @@ jobs:
           sed -i "s/^pkgver=.*/pkgver=${{ steps.version.outputs.VERSION }}/" ./deploy/linux/PKGBUILD
           # Reset pkgrel
           sed -i "s/^pkgrel=.*/pkgrel=1/" ./deploy/linux/PKGBUILD
-          # Fetch new sha256sum
-          URL="https://files.pythonhosted.org/packages/source/m/muzlib/muzlib-${{ steps.version.outputs.VERSION }}.tar.gz"
-          SHA=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
-          sed -i "s/^sha256sums=.*/sha256sums=('$SHA')/" ./deploy/linux/PKGBUILD
 
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
         with:
-          pkgname: python-muzlib
+          pkgname: muzlib-desktop
           pkgbuild: ./deploy/linux/PKGBUILD
           commit_username: ${{ github.repository_owner }}
           commit_email: ezvezdov22@gmail.com
