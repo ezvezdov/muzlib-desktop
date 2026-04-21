@@ -12,6 +12,7 @@ dependencies = [
 [project.scripts]
 # The command name = "the_python_file:the_function_to_run"
 muzlib-desktop = "muzlib_desktop.main:main"
+muzlib = "muzlib_desktop.main:main"
 
 [tool.setuptools.package-data]
 "muzlib_desktop" = ["qml/*.qml", "qml/**/*.qml"]
