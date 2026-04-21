@@ -5,7 +5,7 @@ description = "GUI for muzlib"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "muzlib>=0.3.1",
+    "muzlib>=0.3.2",
     "pyside6",
 ]
 
