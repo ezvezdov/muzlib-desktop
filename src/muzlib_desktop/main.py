@@ -400,7 +400,8 @@ def main():
 
     app.setWindowIcon(QIcon(os.path.join(base_path, "resources", "icons", "icon.svg")))
 
-    app.setDesktopFileName("muzlib")
+    # app.setDesktopFileName("muzlib")
+    app.setDesktopFileName("muzlib-desktop")
 
     backend_obj = Backend()
     engine.rootContext().setContextProperty("backend", backend_obj)
