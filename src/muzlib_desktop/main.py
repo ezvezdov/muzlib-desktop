@@ -7,12 +7,12 @@ import base64
 import urllib.request
 
 from PySide6.QtWidgets import QApplication, QFileDialog
-from PySide6.QtCore import QUrl, QObject, Slot, Signal, Property
+from PySide6.QtCore import QUrl, QObject, Slot, Signal, Property, QThread
 from PySide6.QtQml import QQmlApplicationEngine
-from muzlib.muzlib import Muzlib, SearchType
 from PySide6.QtGui import QIcon
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtCore import QObject, Signal, Slot, Property, QThread
+
+from muzlib.muzlib import Muzlib, SearchType
 from muzlib import files_utils
 
 class SearchWorker(QThread):
@@ -144,21 +144,21 @@ class Backend(QObject):
         self._searching_phase = False
         self._downloading_phase = False
         self._final_phase = False
-        
+
     def set_active_phase(self, init=False, searching=False, downloading=False, final=False):
         print(f"Setting phases: init={init}, searching={searching}, downloading={downloading}, final={final}")
         if self._initialization_phase != init:
             self._initialization_phase = init
             self.initializationPhaseChanged.emit()
-        
+
         if self._searching_phase != searching:
             self._searching_phase = searching
             self.searchingPhaseChanged.emit()
-            
+
         if self._downloading_phase != downloading:
             self._downloading_phase = downloading
             self.downloadingPhaseChanged.emit()
-            
+
         if self._final_phase != final:
             self._final_phase = final
             self.finalPhaseChanged.emit()
@@ -169,7 +169,7 @@ class Backend(QObject):
 
         self.previewURL = ""
         self.previewText = ""
-    
+
     @Property(bool, notify=initializationPhaseChanged)
     def initializationPhase(self):
         return self._initialization_phase
@@ -203,7 +203,7 @@ class Backend(QObject):
     # Define a Property that QML can 'bind' to
     @Property(str, notify=previewURLChanged)
     def previewURL(self):
-        return self._preview_url    
+        return self._preview_url
 
     @previewURL.setter
     def previewURL(self, value):
@@ -233,10 +233,7 @@ class Backend(QObject):
             # Save the path to our class variable
             self.libraryPath = directory
             return directory
-        else:
-            print("Selection cancelled.")
-            return ""
-    
+
 
     @Slot(str)
     def open_music_folder(self, path):
@@ -244,7 +241,7 @@ class Backend(QObject):
             QDesktopServices.openUrl(QUrl.fromLocalFile(path))
         else:
             print(f"Folder not found: {path}")
-        
+
     @Slot(str, str, str, str)
     def search(self, search_type,  artist_name, album_name, song_name):
         self.set_active_phase(searching=True)
@@ -252,10 +249,10 @@ class Backend(QObject):
         # Reset previous search results
         self._reset_search_results()
 
-        
+
         if self.library_path == "":
             self.libraryPath = self.defatult_library_path
-        
+
         match search_type.lower():
             case "artist": self.search_type = SearchType.ARTIST
             case "album": self.search_type = SearchType.ALBUM
@@ -288,13 +285,13 @@ class Backend(QObject):
         if len(self.search_results) == 0:
             print("No search results to download.")
             return
-        
+
         self.set_active_phase(downloading=True)
 
         selected_result = self.search_results[self.search_results_index]
         self.download_worker.set_data(self.ml, selected_result, self.search_type)
         self.download_worker.start()
-    
+
     def _on_download_finished(self, common_path):
         self.set_active_phase(final=True)
         self.downloadFinished.emit(common_path)
@@ -315,9 +312,9 @@ class Backend(QObject):
             self.progressChanged.emit(0, 0, "Download cancelled.")
             print("Download cancelled.")
 
-        
-        
-        
+
+
+
 
     @Slot()
     def next_search_result(self):
@@ -325,7 +322,7 @@ class Backend(QObject):
             self.search_results_index += 1
             self.search_results_index %= len(self.search_results)
             self.update_search_result()
-    
+
     @Slot()
     def previous_search_result(self):
         if len(self.search_results) != 0:
@@ -342,21 +339,21 @@ class Backend(QObject):
             if thumbnail["width"] <= 200:
                 image_url = thumbnail["url"]
             else: break
-        
+
         artist_bold_string = "<b>Artist: </b>"
         artists_bold_string = "<b>Artists: </b>"
         album_bold_string = "<b>Album: </b>"
         title_bold_string = "<b>Title: </b>"
         html_newline = "<br>"
-        if self.search_type == self.search_type.ARTIST:
+        if self.search_type == SearchType.ARTIST:
             preview_text = artist_bold_string + current_result["artist"]
-        elif self.search_type == self.search_type.ALBUM:
+        elif self.search_type == SearchType.ALBUM:
             artist_names = ", ".join([artist["name"] for artist in current_result["artists"]])
             album_name = current_result["title"]
 
             preview_text = artist_bold_string if len(current_result["artists"]) == 1 else artists_bold_string
             preview_text += artist_names + html_newline + album_bold_string + album_name
-        elif self.search_type == self.search_type.SONG:
+        elif self.search_type == SearchType.SONG:
             artist_names = ", ".join([artist["name"] for artist in current_result["artists"]])
             album_name = current_result["album"]["name"]
             song_name = current_result["title"]
@@ -365,9 +362,9 @@ class Backend(QObject):
             preview_text += artist_bold_string if len(current_result["artists"]) == 1 else artists_bold_string
             preview_text += artist_names + html_newline + album_bold_string + album_name
 
-        
+
         # self.previewURL = image_url
-        
+
 
         if image_url:
             try:
@@ -375,10 +372,10 @@ class Backend(QObject):
                 req = urllib.request.Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
                 with urllib.request.urlopen(req) as response:
                     img_bytes = response.read()
-                
+
                 # 2. Convert raw bytes to a Base64 string
                 b64_str = base64.b64encode(img_bytes).decode('utf-8')
-                
+
                 # 3. Format as a Data URI. QML reads this directly from memory!
                 self.previewURL = f"data:image/jpeg;base64,{b64_str}"
             except Exception as e:
@@ -386,9 +383,9 @@ class Backend(QObject):
                 self.previewURL = "" # Fallback to empty if it fails
         else:
             self.previewURL = ""
-        
+
         self.previewText = preview_text
-        
+
 
 def main():
     """Initializes and manages the application execution"""
@@ -406,7 +403,6 @@ def main():
     backend_obj = Backend()
     engine.rootContext().setContextProperty("backend", backend_obj)
 
-    """Needed to close the app with Ctrl+C"""
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     qml_file_path = os.path.join(base_path, "qml", "main.qml")
